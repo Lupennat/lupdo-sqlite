@@ -1,4 +1,4 @@
-import Database from 'better-sqlite3';
+import Database, { Database as Connection } from 'better-sqlite3';
 import {
     ATTR_DEBUG,
     DEBUG_ENABLED,
@@ -10,6 +10,7 @@ import {
     PdoStatement,
     PdoTransaction
 } from 'lupdo';
+
 import SqliteDriver from '../sqlite-driver';
 import { drivers, tests } from './fixtures/config';
 
@@ -109,6 +110,17 @@ describe('Sqlite Driver', () => {
         expect(raw.connection).toBeInstanceOf(Database);
 
         await raw.release();
+    });
+
+    it.each(tests)('Works $driver Get Raw Driver Connection', async driver => {
+        const conn = await pdos[driver].getRawDriverConnection<Connection>();
+        expect(conn).toBeInstanceOf(Database);
+        conn.defaultSafeIntegers(true);
+        const row = conn.prepare('SELECT * FROM users WHERE id = ?').get(1);
+        expect(row.id).toEqual(BigInt(1));
+        expect(row.name).toBe('Edmund');
+        expect(row.gender).toBe('Multigender');
+        conn.close();
     });
 
     it.each(tests)('Works $driver Connection On Create', async (driver, config) => {

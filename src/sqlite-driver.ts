@@ -25,10 +25,11 @@ class SqliteDriver extends PdoDriver {
         super(driver, poolOptions, attributes);
     }
 
-    protected async createConnection(): Promise<SqlitePoolConnection> {
+    protected async createConnection(unsecure = false): Promise<SqlitePoolConnection> {
         const { path, ...sqliteOptions } = this.options;
         const debugMode = this.getAttribute(ATTR_DEBUG) as number;
-        if (debugMode === DEBUG_ENABLED) {
+
+        if (!unsecure && debugMode === DEBUG_ENABLED) {
             const customVerbose = sqliteOptions.verbose;
             sqliteOptions.verbose = (...args) => {
                 if (typeof customVerbose === 'function') {
@@ -37,6 +38,7 @@ class SqliteDriver extends PdoDriver {
                 console.log(...args);
             };
         }
+
         const db = new Database(path, sqliteOptions);
 
         for (const name in SqliteDriver.aggregateFunctions) {
@@ -50,7 +52,9 @@ class SqliteDriver extends PdoDriver {
             db.function(name, options, execute);
         }
 
-        db.defaultSafeIntegers(true);
+        if (!unsecure) {
+            db.defaultSafeIntegers(true);
+        }
 
         return db as SqlitePoolConnection;
     }
