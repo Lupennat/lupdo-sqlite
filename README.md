@@ -42,6 +42,16 @@ new required option added:
 
 -   path: string
 
+## Better Sqlite Overrides
+
+By default Ludpo-sqlite enable `db.defaultSafeIntegers(true)` and `statement.safeIntegers(true)`.
+[https://github.com/WiseLibs/better-sqlite3/blob/2194095aa1183e9c21d28eafadeac0d4d4d42625/docs/integer.md#getting-bigints-from-the-database](https://github.com/WiseLibs/better-sqlite3/blob/2194095aa1183e9c21d28eafadeac0d4d4d42625/docs/integer.md#getting-bigints-from-the-database)
+
+Internally lupdo-sqlite convert bigint to normal number if precision will be preserved.
+
+> **Note**
+> Custom Aggregate and Function must be adapted as required if using numbers.
+
 ## Kill Connection
 
 Lupdo-sqlite do not support kill query, if you need to perform very slow queries, you should implement [worker threads](https://github.com/WiseLibs/better-sqlite3/blob/2194095aa1183e9c21d28eafadeac0d4d4d42625/docs/threads.md) by yourself.
