@@ -5,16 +5,17 @@ import {
     Pdo,
     PdoConnectionI,
     PdoError,
-    PdoI,
     PdoPreparedStatement,
     PdoStatement,
     PdoTransaction
 } from 'lupdo';
 
 import SqliteDriver from '../sqlite-driver';
-import { drivers, tests } from './fixtures/config';
+import { pdoData } from './fixtures/config';
 
 describe('Sqlite Driver', () => {
+    const pdo = new Pdo(pdoData.driver, pdoData.config);
+
     const sleep = function (timeout: number): Promise<void> {
         return new Promise(resolve => {
             setTimeout(() => {
@@ -23,7 +24,6 @@ describe('Sqlite Driver', () => {
         });
     };
 
-    const pdos: { [key: string]: PdoI } = {};
     beforeAll(() => {
         SqliteDriver.createAggregate('max_len', {
             start: 0,
@@ -40,80 +40,76 @@ describe('Sqlite Driver', () => {
                 return a + b;
             }
         });
-
-        for (const driver in drivers) {
-            pdos[driver] = new Pdo(driver, drivers[driver]);
-        }
     });
 
     afterAll(async () => {
-        for (const driver in pdos) {
-            await pdos[driver].disconnect();
-        }
+        await pdo.disconnect();
     });
 
     it('Works Driver Registration', () => {
         expect(Pdo.getAvailableDrivers()).toEqual(['sqlite', 'sqlite3']);
     });
 
-    it.each(tests)('Works $driver Create Aggregate', async driver => {
-        const stmt = await pdos[driver].query('SELECT max_len(name) FROM companies;');
+    it('Works Create Aggregate', async () => {
+        const stmt = await pdo.query('SELECT max_len(name) FROM companies;');
         expect(stmt.fetchColumn<number>(0).all()).toEqual([25]);
     });
 
-    it.each(tests)('Works $driver Create Function', async driver => {
-        const stmt = await pdos[driver].query('SELECT add2(name, gender) FROM users;');
+    it('Works Create Function', async () => {
+        const stmt = await pdo.query('SELECT add2(name, gender) FROM users;');
         expect(stmt.fetchColumn<string>(0).get()).toBe('EdmundMultigender');
         expect(stmt.fetchColumn<string>(0).get()).toBe('KyleighCis man');
         expect(stmt.fetchColumn<string>(0).get()).toBe('JosefaCisgender male');
     });
 
-    it.each(tests)('Works $driver BeginTransaction Return Transaction', async driver => {
-        const trx = await pdos[driver].beginTransaction();
+    it('Works BeginTransaction Return Transaction', async () => {
+        const trx = await pdo.beginTransaction();
         expect(trx).toBeInstanceOf(PdoTransaction);
         await trx.rollback();
     });
 
-    it.each(tests)('Works $driver Exec Return Number', async driver => {
-        const res = await pdos[driver].exec('SELECT 1');
+    it('Works Exec Return Number', async () => {
+        const res = await pdo.exec('SELECT 1');
         expect(typeof res === 'number').toBeTruthy();
         expect(res).toEqual(0);
-        expect(await pdos[driver].exec("INSERT INTO users (name, gender) VALUES ('Claudio', 'All');")).toEqual(1);
+        const trx = await pdo.beginTransaction();
+        expect(await trx.exec("INSERT INTO users (name, gender) VALUES ('Claudio', 'All');")).toEqual(1);
+        await trx.rollback();
     });
 
-    it.each(tests)('Works $driver Exec Fails', async driver => {
-        await expect(pdos[driver].exec('SELECT ?')).rejects.toThrow(PdoError);
+    it('Works Exec Fails', async () => {
+        await expect(pdo.exec('SELECT ?')).rejects.toThrow(PdoError);
     });
 
-    it.each(tests)('Works $driver Query Return PdoStatement', async driver => {
-        const stmt = await pdos[driver].query('SELECT 1');
+    it('Works Query Return PdoStatement', async () => {
+        const stmt = await pdo.query('SELECT 1');
         expect(stmt).toBeInstanceOf(PdoStatement);
     });
 
-    it.each(tests)('Works $driver Query Fails', async driver => {
-        await expect(pdos[driver].query('SELECT ?')).rejects.toThrow(PdoError);
+    it('Works Query Fails', async () => {
+        await expect(pdo.query('SELECT ?')).rejects.toThrow(PdoError);
     });
 
-    it.each(tests)('Works $driver Prepare Return PdoPreparedStatement', async driver => {
-        const stmt = await pdos[driver].prepare('SELECT 1');
+    it('Works Prepare Return PdoPreparedStatement', async () => {
+        const stmt = await pdo.prepare('SELECT 1');
         expect(stmt).toBeInstanceOf(PdoPreparedStatement);
         await stmt.execute();
         await stmt.close();
     });
 
-    it.each(tests)('Works $driver Prepare Fails', async driver => {
-        await expect(pdos[driver].prepare('SELECT ??')).rejects.toThrow(PdoError);
+    it('Works Prepare Fails', async () => {
+        await expect(pdo.prepare('SELECT ??')).rejects.toThrow(PdoError);
     });
 
-    it.each(tests)('Works $driver Get Raw Pool Connection', async driver => {
-        const raw = await pdos[driver].getRawPoolConnection();
+    it('Works Get Raw Pool Connection', async () => {
+        const raw = await pdo.getRawPoolConnection();
         expect(raw.connection).toBeInstanceOf(Database);
 
         await raw.release();
     });
 
-    it.each(tests)('Works $driver Get Raw Driver Connection', async driver => {
-        const conn = await pdos[driver].getRawDriverConnection<Connection>();
+    it('Works Get Raw Driver Connection', async () => {
+        const conn = await pdo.getRawDriverConnection<Connection>();
         expect(conn).toBeInstanceOf(Database);
         conn.defaultSafeIntegers(true);
         const row = conn.prepare('SELECT * FROM users WHERE id = ?').get(1);
@@ -123,10 +119,10 @@ describe('Sqlite Driver', () => {
         conn.close();
     });
 
-    it.each(tests)('Works $driver Connection On Create', async (driver, config) => {
+    it('Works Connection On Create', async () => {
         const pdo = new Pdo(
-            driver,
-            config,
+            pdoData.driver,
+            pdoData.config,
             {
                 created: async (uuid: string, connection: PdoConnectionI) => {
                     await connection.query('cache_size = 28000');
@@ -142,23 +138,23 @@ describe('Sqlite Driver', () => {
         await pdo.disconnect();
     });
 
-    it.each(tests)('Works $driver Debug', async (driver, config) => {
+    it('Works Debug', async () => {
         console.log = jest.fn();
         console.trace = jest.fn();
-        const pdo = new Pdo(driver, config, {}, { [ATTR_DEBUG]: DEBUG_ENABLED });
+        const pdo = new Pdo(pdoData.driver, pdoData.config, {}, { [ATTR_DEBUG]: DEBUG_ENABLED });
         await pdo.query('SELECT 1');
         expect(console.log).toHaveBeenCalled();
         await pdo.disconnect();
     });
 
-    it.each(tests)('Works $driver Debug Not Override Verbose', async (driver, config) => {
+    it('Works Debug Not Override Verbose', async () => {
         console.log = jest.fn();
         console.trace = jest.fn();
         const queries: any[] = [];
         const pdo = new Pdo(
-            driver,
+            pdoData.driver,
             {
-                ...config,
+                ...pdoData.config,
                 verbose(...args: any[]) {
                     queries.push(args);
                 }
@@ -173,7 +169,7 @@ describe('Sqlite Driver', () => {
         await pdo.disconnect();
     });
 
-    it.each(tests)('Works $driver Destroy Connection Does not kill connection', async (driver, config) => {
+    it('Works Destroy Connection Does not kill connection', async () => {
         console.log = jest.fn();
         console.trace = jest.fn();
 
@@ -186,8 +182,8 @@ describe('Sqlite Driver', () => {
         };
 
         const pdo = new Pdo(
-            driver,
-            config,
+            pdoData.driver,
+            pdoData.config,
             {
                 killTimeoutMillis: 500,
                 killResource: true,
