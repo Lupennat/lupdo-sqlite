@@ -1,28 +1,20 @@
-import { Pdo, PdoI } from 'lupdo';
-import { drivers, tests } from './fixtures/config';
+import { Pdo } from 'lupdo';
+import { pdoData } from './fixtures/config';
 
 describe('Sql Prepared Statement', () => {
-    const pdos: { [key: string]: PdoI } = {};
-
-    beforeAll(() => {
-        for (const driver in drivers) {
-            pdos[driver] = new Pdo(driver, drivers[driver]);
-        }
-    });
+    const pdo = new Pdo(pdoData.driver, pdoData.config);
 
     afterAll(async () => {
-        for (const driver in pdos) {
-            await pdos[driver].disconnect();
-        }
+        await pdo.disconnect();
     });
 
     afterEach(() => {
         Pdo.setLogger(() => {});
     });
 
-    it.each(tests)('Works $driver Statement Prepared Statement Execute Without Array', async driver => {
-        const stmt = await pdos[driver].prepare('SELECT * FROM users LIMIT 3;');
-        const stmt2 = await pdos[driver].prepare('SELECT * FROM users LIMIT 5;');
+    it('Works Statement Prepared Statement Execute Without Array', async () => {
+        const stmt = await pdo.prepare('SELECT * FROM users LIMIT 3;');
+        const stmt2 = await pdo.prepare('SELECT * FROM users LIMIT 5;');
         await stmt.execute();
         await stmt2.execute();
 
@@ -36,8 +28,8 @@ describe('Sql Prepared Statement', () => {
         await stmt2.close();
     });
 
-    it.each(tests)('Works $driver Statement Prepared Statement Bind Numeric Value', async driver => {
-        const stmt = await pdos[driver].prepare('SELECT * FROM users limit ?;');
+    it('Works Statement Prepared Statement Bind Numeric Value', async () => {
+        const stmt = await pdo.prepare('SELECT * FROM users limit ?;');
         stmt.bindValue(1, 3);
         await stmt.execute();
         expect(stmt.fetchArray().all().length).toBe(3);
@@ -51,8 +43,8 @@ describe('Sql Prepared Statement', () => {
         await stmt.close();
     });
 
-    it.each(tests)('Works $driver Statement Prepared Statement Bind Key Value', async driver => {
-        const stmt = await pdos[driver].prepare('SELECT * FROM users limit :limit;');
+    it('Works Statement Prepared Statement Bind Key Value', async () => {
+        const stmt = await pdo.prepare('SELECT * FROM users limit :limit;');
         stmt.bindValue('limit', 3);
         await stmt.execute();
         expect(stmt.fetchArray().all().length).toBe(3);
@@ -66,8 +58,8 @@ describe('Sql Prepared Statement', () => {
         await stmt.close();
     });
 
-    it.each(tests)('Works $driver Statement Bind Value Fails With Mixed Values', async driver => {
-        let stmt = await pdos[driver].prepare('SELECT * FROM users where gender = ? LIMIT :limit;');
+    it('Works Statement Bind Value Fails With Mixed Values', async () => {
+        let stmt = await pdo.prepare('SELECT * FROM users where gender = ? LIMIT :limit;');
         stmt.bindValue(1, 'Cisgender male');
         expect(() => {
             stmt.bindValue('limit', 3);
@@ -75,7 +67,7 @@ describe('Sql Prepared Statement', () => {
 
         await stmt.close();
 
-        stmt = await pdos[driver].prepare('SELECT * FROM users where gender = ? LIMIT :limit;');
+        stmt = await pdo.prepare('SELECT * FROM users where gender = ? LIMIT :limit;');
         stmt.bindValue('limit', 3);
         expect(() => {
             stmt.bindValue(1, 'Cisgender male');
@@ -84,8 +76,8 @@ describe('Sql Prepared Statement', () => {
         await stmt.close();
     });
 
-    it.each(tests)('Works $driver Statement Execute With Numeric Value', async driver => {
-        const stmt = await pdos[driver].prepare('SELECT * FROM users limit ?;');
+    it('Works Statement Execute With Numeric Value', async () => {
+        const stmt = await pdo.prepare('SELECT * FROM users limit ?;');
         await stmt.execute([3]);
         expect(stmt.fetchArray().all().length).toBe(3);
         expect(stmt.fetchArray().all().length).toBe(0);
@@ -97,8 +89,8 @@ describe('Sql Prepared Statement', () => {
         await stmt.close();
     });
 
-    it.each(tests)('Works $driver Statement Execute With Key Value', async driver => {
-        const stmt = await pdos[driver].prepare('SELECT * FROM users limit :limit;');
+    it('Works Statement Execute With Key Value', async () => {
+        const stmt = await pdo.prepare('SELECT * FROM users limit :limit;');
 
         await stmt.execute({ limit: 3 });
         expect(stmt.fetchArray().all().length).toBe(3);
@@ -111,32 +103,32 @@ describe('Sql Prepared Statement', () => {
         await stmt.close();
     });
 
-    it.each(tests)('Works $driver Statement Bind Number', async driver => {
-        let stmt = await pdos[driver].prepare('SELECT * FROM users limit :limit;');
+    it('Works Statement Bind Number', async () => {
+        let stmt = await pdo.prepare('SELECT * FROM users limit :limit;');
         stmt.bindValue('limit', BigInt(3));
         await stmt.execute();
         expect(stmt.fetchArray().all().length).toBe(3);
         await stmt.close();
-        stmt = await pdos[driver].prepare('SELECT ?;');
+        stmt = await pdo.prepare('SELECT ?;');
         await stmt.execute([1]);
         expect(stmt.fetchColumn(0).get()).toBe(1);
         await stmt.close();
     });
 
-    it.each(tests)('Works $driver Statement Bind BigInter', async driver => {
-        let stmt = await pdos[driver].prepare('SELECT * FROM users limit :limit;');
+    it('Works Statement Bind BigInter', async () => {
+        let stmt = await pdo.prepare('SELECT * FROM users limit :limit;');
         stmt.bindValue('limit', BigInt(3));
         await stmt.execute();
         expect(stmt.fetchArray().all().length).toBe(3);
         await stmt.close();
-        stmt = await pdos[driver].prepare('SELECT ?;');
+        stmt = await pdo.prepare('SELECT ?;');
         await stmt.execute([BigInt(9007199254740994)]);
         expect(stmt.fetchColumn(0).get()).toBe(BigInt(9007199254740994));
         await stmt.close();
     });
 
-    it.each(tests)('Works $driver Statement Bind Date', async driver => {
-        let stmt = await pdos[driver].prepare(
+    it('Works Statement Bind Date', async () => {
+        let stmt = await pdo.prepare(
             "SELECT * FROM companies WHERE CAST(strftime('%s', opened) as INTEGER) > CAST(strftime('%s', ?) as INTEGER);"
         );
         const date = new Date('2014-01-01');
@@ -144,57 +136,57 @@ describe('Sql Prepared Statement', () => {
         await stmt.execute();
         expect(stmt.fetchArray().all().length).toBe(10);
         await stmt.close();
-        stmt = await pdos[driver].prepare("SELECT CAST(strftime('%s', ?) as INTEGER);");
+        stmt = await pdo.prepare("SELECT CAST(strftime('%s', ?) as INTEGER);");
         await stmt.execute([date]);
 
         expect(new Date((stmt.fetchColumn(0).get() as number) * 1000)).toEqual(date);
         await stmt.close();
     });
 
-    it.each(tests)('Works $driver Statement Bind Boolean', async driver => {
-        let stmt = await pdos[driver].prepare('SELECT * FROM companies where active = ?;');
+    it('Works Statement Bind Boolean', async () => {
+        let stmt = await pdo.prepare('SELECT * FROM companies where active = ?;');
         stmt.bindValue(1, false);
         await stmt.execute();
         expect(stmt.fetchArray().all().length).toBe(5);
         await stmt.close();
-        stmt = await pdos[driver].prepare('SELECT ?;');
+        stmt = await pdo.prepare('SELECT ?;');
         await stmt.execute([true]);
         expect(stmt.fetchColumn(0).get()).toEqual(1);
         await stmt.close();
     });
 
-    it.each(tests)('Works $driver Statement Bind String', async driver => {
-        let stmt = await pdos[driver].prepare('select `id` from users where `name` = ?;');
+    it('Works Statement Bind String', async () => {
+        let stmt = await pdo.prepare('select `id` from users where `name` = ?;');
         stmt.bindValue(1, 'Edmund');
         await stmt.execute();
         expect(stmt.fetchArray().all().length).toBe(1);
         await stmt.close();
-        stmt = await pdos[driver].prepare('SELECT LOWER(?);');
+        stmt = await pdo.prepare('SELECT LOWER(?);');
         await stmt.execute(['Edmund']);
         expect(stmt.fetchColumn(0).get()).toEqual('edmund');
         await stmt.close();
     });
 
-    it.each(tests)('Works $driver Statement Buffer', async driver => {
-        let stmt = await pdos[driver].prepare('select ?');
+    it('Works Statement Buffer', async () => {
+        let stmt = await pdo.prepare('select ?');
         const buffer = Buffer.from('Edmund');
         stmt.bindValue(1, buffer);
         await stmt.execute();
         expect(stmt.fetchColumn<Buffer>(0).get()?.toString()).toBe('Edmund');
         await stmt.close();
         const newBuffer = Buffer.from('buffer as blob on database');
-        stmt = await pdos[driver].prepare('INSERT INTO companies (name, opened, active, binary) VALUES(?,?,?,?);');
+        stmt = await pdo.prepare('INSERT INTO companies (name, opened, active, binary) VALUES(?,?,?,?);');
         await stmt.execute(['Test', '2000-12-26T00:00:00.000Z', 1, newBuffer]);
         const lastId = stmt.lastInsertId() as number;
         await stmt.close();
-        stmt = await pdos[driver].prepare('SELECT binary FROM companies WHERE id = ?;');
+        stmt = await pdo.prepare('SELECT binary FROM companies WHERE id = ?;');
         await stmt.execute([lastId]);
         expect(stmt.fetchColumn<Buffer>(0).get()?.toString()).toBe('buffer as blob on database');
         await stmt.close();
-        stmt = await pdos[driver].prepare('SELECT id FROM companies WHERE binary = ?;');
+        stmt = await pdo.prepare('SELECT id FROM companies WHERE binary = ?;');
         await stmt.execute([Buffer.from('buffer as blob on database')]);
         expect(stmt.fetchColumn<number>(0).get()).toBe(lastId);
         await stmt.close();
-        expect(await pdos[driver].exec('DELETE FROM companies WHERE (id = ' + lastId + ');')).toBe(1);
+        expect(await pdo.exec('DELETE FROM companies WHERE (id = ' + lastId + ');')).toBe(1);
     });
 });

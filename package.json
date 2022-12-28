@@ -38,12 +38,13 @@
         "build:esm": "tsc -p ./typescript/tsconfig.esm.json",
         "build:types": "tsc -p ./typescript/tsconfig.types.json",
         "clean": "rimraf ./dist",
-        "test": "npm run lint && jest --config test/jest.config.js",
+        "test:sqlite3": "npm run lint && cross-env DB=sqlite3 jest --config test/jest.config.js",
+        "test:db": "npm run lint && jest --config test/jest.config.js",
         "test:coverage": "npm run lint && jest --config test/jest.config.js --coverage",
         "lint": "eslint --ext \".js,.jsx,.ts,.tsx\" \"./src\"",
         "lint:fix": "eslint --fix --ext \".js,.jsx,.ts,.tsx\" \"./src\"",
-        "db:up": "sqlite3 .sqlite.db < src/__tests__/data/sqlite.sql && sqlite3 .sqlite3.db < src/__tests__/data/sqlite.sql",
-        "db:down": "rimraf .sqlite*.db"
+        "db:up": "sqlite3 .sqlite3.db < src/__tests__/data/sqlite.sql",
+        "db:down": "rimraf .sqlite3.db"
     },
     "engines": {
         "node": "^14.19.0 || ^16.10.0 || >=18.0.0"
@@ -52,6 +53,7 @@
         "@types/jest": "^29.2.4",
         "@typescript-eslint/eslint-plugin": "^5.46.1",
         "@typescript-eslint/parser": "^5.46.1",
+        "cross-env": "^7.0.3",
         "eslint": "^8.29.0",
         "eslint-config-prettier": "^8.5.0",
         "eslint-plugin-prettier": "^4.2.1",
