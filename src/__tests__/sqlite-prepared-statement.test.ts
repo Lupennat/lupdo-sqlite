@@ -167,7 +167,7 @@ describe('Sql Prepared Statement', () => {
         await stmt.close();
     });
 
-    it('Works Statement Buffer', async () => {
+    it('Works Statement Bind Buffer', async () => {
         let stmt = await pdo.prepare('select ?');
         const buffer = Buffer.from('Edmund');
         stmt.bindValue(1, buffer);
@@ -188,5 +188,22 @@ describe('Sql Prepared Statement', () => {
         expect(stmt.fetchColumn<number>(0).get()).toBe(lastId);
         await stmt.close();
         expect(await pdo.exec('DELETE FROM companies WHERE (id = ' + lastId + ');')).toBe(1);
+    });
+
+    it('Works Statement Bind Null', async () => {
+        let stmt = await pdo.prepare('select ?;');
+        stmt.bindValue(1, null);
+        await stmt.execute();
+        expect(stmt.fetchColumn(0).get()).toBeNull();
+        await stmt.close();
+        stmt = await pdo.prepare('INSERT INTO companies (`name`, `opened`, `active`, `binary`) VALUES(?,?,?,?);');
+        await stmt.execute(['Test', '2000-12-26 00:00:00', 1, null]);
+        const lastId = (await stmt.lastInsertId()) as number;
+        await stmt.close();
+        stmt = await pdo.prepare('SELECT `binary` FROM companies WHERE id = ?;');
+        await stmt.execute([lastId]);
+        expect(stmt.fetchColumn(0).get()).toBeNull();
+        await stmt.close();
+        expect(await pdo.exec('DELETE FROM companies WHERE (`id` = ' + lastId + ');')).toBe(1);
     });
 });
