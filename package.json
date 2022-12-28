@@ -1,6 +1,6 @@
 {
     "name": "lupdo-sqlite",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "description": "Sqlite Driver For Lupdo",
     "author": "Claudio Pennati <claudio.pennati@gmail.com>",
     "license": "MIT",
@@ -39,6 +39,7 @@
         "build:types": "tsc -p ./typescript/tsconfig.types.json",
         "clean": "rimraf ./dist",
         "test:sqlite3": "npm run lint && cross-env DB=sqlite3 jest --config test/jest.config.js",
+        "test:local": "npm run db:up && npm run test:sqlite3 && npm run db:down",
         "test:db": "npm run lint && jest --config test/jest.config.js",
         "test:coverage": "npm run lint && jest --config test/jest.config.js --coverage",
         "lint": "eslint --ext \".js,.jsx,.ts,.tsx\" \"./src\"",
@@ -68,7 +69,7 @@
     "dependencies": {
         "@types/better-sqlite3": "^7.6.2",
         "better-sqlite3": "^7.6.2",
-        "lupdo": "^1.2.1",
+        "lupdo": "^2.0.0",
         "tslib": "^2.4.1"
     }
 }
