@@ -6,7 +6,6 @@
     </a>
 </p>
 
-
 # Lupdo-sqlite
 
 [Lupdo](https://www.npmjs.com/package/lupdo) Driver For Sqlite.
@@ -68,3 +67,39 @@ Lupdo-sqlite do not support kill query, if you need to perform very slow queries
 > **Note**
 > you can use better-sqlite3 native api, retrieving a raw connection from the pool with `pdo.getRawPoolConnection()`.
 > Do not forget to release rawPoolConnection before stop the job, otherwise the pool will be stuck.
+
+## SqliteDriver Create Function & Aggregate
+
+SqliteDriver expose two static Method in order to register custom [aggregates](https://sqlite.org/lang_aggfunc.html) and [functions](https://sqlite.org/lang_corefunc.html).
+
+Here You can find more details on [aggregate](https://github.com/WiseLibs/better-sqlite3/blob/HEAD/docs/api.md#aggregatename-options---this) and [functions](https://github.com/WiseLibs/better-sqlite3/blob/HEAD/docs/api.md#functionname-options-function---this) Options.
+
+> **Note**
+> The `SqliteDriver.createFunction(name, options)` differs from the original `better-sqlite3.function(name, [options], function)`, it accepts only a name and a config, config must contains `execute` function.
+
+```ts
+import { Pdo } from 'lupdo';
+import 'lupdo-sqlite';
+import { SqliteDriver } from 'lupdo-sqlite';
+
+SqliteDriver.createAggregate('max_len', {
+    start: 0,
+    step: (context: number, nextValue: string) => {
+        if (nextValue.length > context) {
+            return nextValue.length;
+        }
+        return context;
+    }
+});
+
+SqliteDriver.createFunction('add2', {
+    execute(a, b) {
+        return a + b;
+    }
+});
+
+const pdo = new Pdo('sqlite3', { path: './test.db' });
+
+await pdo.query('SELECT max_len(name) FROM companies;');
+await pdo.query('SELECT add2(name, gender) FROM users;');
+```
