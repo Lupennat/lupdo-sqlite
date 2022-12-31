@@ -2,6 +2,68 @@ DROP TABLE IF EXISTS "users";
 DROP TABLE IF EXISTS "companies";
 CREATE TABLE "users" ("id" INTEGER PRIMARY KEY AUTOINCREMENT,"name" TEXT NOT NULL,"gender" TEXT NOT NULL);
 CREATE TABLE "companies" ("id" INTEGER PRIMARY KEY AUTOINCREMENT,"name" TEXT NOT NULL, "opened" TEXT NOT NULL, "active" REAL NOT NULL,"binary" BLOB NULL);
+CREATE TABLE "types" (
+"int" INT NOT NULL,
+"integer" INTEGER NOT NULL,
+"tinyint" TINYINT NOT NULL,
+"smallint" SMALLINT NOT NULL,
+"mediumint" MEDIUMINT NOT NULL,
+"bigint" BIGINT NOT NULL,
+"unsigned_big_int" UNSIGNED BIG INT NOT NULL,
+"int2" INT2 NOT NULL,
+"int8" INT8 NOT NULL,
+"character" CHARACTER(20) NOT NULL,
+"varchar" VARCHAR(255) NOT NULL,
+"varying_character" VARYING CHARACTER(255) NOT NULL,
+"nchar" NCHAR(55) NOT NULL,
+"native_character" NATIVE CHARACTER(70) NOT NULL,
+"nvarchar" NVARCHAR(100) NOT NULL,
+"text" TEXT NOT NULL,
+"clob" CLOB NOT NULL,
+"blob" BLOB NOT NULL,
+"real" REAL NOT NULL,
+"double" DOUBLE NOT NULL,
+"double_precision" DOUBLE PRECISION NOT NULL,
+"float" FLOAT NOT NULL,
+"numeric" NUMERIC NOT NULL,
+"decimal" DECIMAL(10,5) NOT NULL,
+"boolean" BOOLEAN NOT NULL,
+"date" DATE NOT NULL,
+"datetime" DATETIME NOT NULL
+);
+
+INSERT INTO "types" (`int`,`integer`,`tinyint`,`smallint`,`mediumint`,`bigint`,`unsigned_big_int`,`int2`,`int8`,`character`,`varchar`,`varying_character`,`nchar`,`native_character`,`nvarchar`,`text`,`clob`,`blob`,`real`,`double`,`double_precision`,`float`,`numeric`,`decimal`,`boolean`,`date`,`datetime`) 
+VALUES (
+10,
+20,
+3,
+4,
+5,
+9007199254740992,
+9007199254740993,
+2,
+4,
+"character",
+"varchar",
+"varying_character",
+"nchar",
+"native_character",
+"nvarchar",
+"text",
+"clob",
+x'626c6f622061732074657874',
+900719925474099.1267,
+1234.56686767065705,
+1234.56686767065706,
+1234.12,
+1234567.12,
+12345.67890,
+1,
+1672504892,
+1672505549
+);
+
+
 INSERT INTO "users" (`name`, `gender`) VALUES ("Edmund","Multigender");
 INSERT INTO "users" (`name`, `gender`) VALUES ("Kyleigh","Cis man");
 INSERT INTO "users" (`name`, `gender`) VALUES ("Josefa","Cisgender male");

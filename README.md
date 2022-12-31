@@ -60,6 +60,11 @@ Internally lupdo-sqlite convert bigint to normal number if precision will be pre
 > **Note**
 > Custom Aggregate and Function must be adapted as required if using numbers.
 
+## Not Integer Numbers
+
+> **Warning**
+> All non-integer numbers are returned as strings, no precision is guaranteed, you can choose which cast to apply in your application.
+
 ## Kill Connection
 
 Lupdo-sqlite do not support kill query, if you need to perform very slow queries, you should implement [worker threads](https://github.com/WiseLibs/better-sqlite3/blob/2194095aa1183e9c21d28eafadeac0d4d4d42625/docs/threads.md) by yourself.

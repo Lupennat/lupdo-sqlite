@@ -91,7 +91,10 @@ class SqliteRawConnection extends PdoRawConnection {
         return value;
     }
 
-    protected convertToSafeNumber(valueToCheck: number | bigint): number | bigint {
+    protected convertToSafeNumber(valueToCheck: number | bigint): string | number | bigint {
+        if (typeof valueToCheck !== 'bigint' && valueToCheck % 1 !== 0) {
+            return valueToCheck.toString();
+        }
         const stringValue = valueToCheck.toString();
         const bigInt = BigInt(stringValue);
         if (bigInt > Number.MAX_SAFE_INTEGER || bigInt < Number.MIN_SAFE_INTEGER) {
