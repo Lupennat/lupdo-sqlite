@@ -50,16 +50,47 @@ describe('Sqlite BigInt Cast', () => {
             '1234.56686767065705',
             '1234.56686767065706',
             1234.12,
-            1234567.12,
+            '1234567.1200',
             '12345.67890',
             1,
             1672504892,
             1672505549
         ]);
+
+        await stmt.execute([
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        ]);
+
         await stmt.close();
 
-        const query = await pdo.query('SELECT * FROM types LIMIT 1;');
-        const row = query.fetchDictionary().get() as { [key: string]: ValidBindings };
+        const query = await pdo.query('SELECT * FROM types LIMIT 2;');
+        let row = query.fetchDictionary().get() as { [key: string]: ValidBindings };
         expect(row.int).toBe(10);
         expect(row.integer).toBe(20);
         expect(row.tinyint).toBe(3);
@@ -87,6 +118,35 @@ describe('Sqlite BigInt Cast', () => {
         expect(row.boolean).toBe(1);
         expect(row.date).toBe(1672504892);
         expect(row.datetime).toBe(1672505549);
+
+        row = query.fetchDictionary().get() as { [key: string]: ValidBindings };
+        expect(row.int).toBeNull();
+        expect(row.integer).toBeNull();
+        expect(row.tinyint).toBeNull();
+        expect(row.smallint).toBeNull();
+        expect(row.mediumint).toBeNull();
+        expect(row.bigint).toBeNull();
+        expect(row.unsigned_big_int).toBeNull();
+        expect(row.int2).toBeNull();
+        expect(row.int8).toBeNull();
+        expect(row.character).toBeNull();
+        expect(row.varchar).toBeNull();
+        expect(row.varying_character).toBeNull();
+        expect(row.nchar).toBeNull();
+        expect(row.native_character).toBeNull();
+        expect(row.nvarchar).toBeNull();
+        expect(row.text).toBeNull();
+        expect(row.clob).toBeNull();
+        expect(row.blob).toBeNull();
+        expect(row.real).toBeNull();
+        expect(row.double).toBeNull();
+        expect(row.double_precision).toBeNull();
+        expect(row.float).toBeNull();
+        expect(row.numeric).toBeNull();
+        expect(row.decimal).toBeNull();
+        expect(row.boolean).toBeNull();
+        expect(row.date).toBeNull();
+        expect(row.datetime).toBeNull();
 
         await pdo.disconnect();
     });

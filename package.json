@@ -38,8 +38,10 @@
         "build:esm": "tsc -p ./typescript/tsconfig.esm.json",
         "build:types": "tsc -p ./typescript/tsconfig.types.json",
         "clean": "rimraf ./dist",
+        "local:test": "npm run db:up && npm run test:sqlite3 && npm run db:down",
+        "local:coverage": "npm run db:up && npm run test:sqlite3:coverage && npm run db:down",
         "test:sqlite3": "npm run lint && cross-env DB=sqlite3 jest --config test/jest.config.js",
-        "test:local": "npm run db:up && npm run test:sqlite3 && npm run db:down",
+        "test:sqlite3:coverage": "npm run lint && cross-env DB=sqlite3 jest --config test/jest.config.js --coverage",
         "test:db": "npm run lint && jest --config test/jest.config.js",
         "test:coverage": "npm run lint && jest --config test/jest.config.js --coverage",
         "lint": "eslint --ext \".js,.jsx,.ts,.tsx\" \"./src\"",
@@ -69,7 +71,7 @@
     "dependencies": {
         "@types/better-sqlite3": "^7.6.2",
         "better-sqlite3": "^7.6.2",
-        "lupdo": "^2.0.1",
+        "lupdo": "^2.0.3",
         "tslib": "^2.4.1"
     }
 }

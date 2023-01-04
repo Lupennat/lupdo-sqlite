@@ -1,35 +1,36 @@
 DROP TABLE IF EXISTS "users";
 DROP TABLE IF EXISTS "companies";
+DROP TABLE IF EXISTS "types";
 CREATE TABLE "users" ("id" INTEGER PRIMARY KEY AUTOINCREMENT,"name" TEXT NOT NULL,"gender" TEXT NOT NULL);
 CREATE TABLE "companies" ("id" INTEGER PRIMARY KEY AUTOINCREMENT,"name" TEXT NOT NULL, "opened" TEXT NOT NULL, "active" REAL NOT NULL,"binary" BLOB NULL);
 CREATE TABLE "types" (
-"int" INT NOT NULL,
-"integer" INTEGER NOT NULL,
-"tinyint" TINYINT NOT NULL,
-"smallint" SMALLINT NOT NULL,
-"mediumint" MEDIUMINT NOT NULL,
-"bigint" BIGINT NOT NULL,
-"unsigned_big_int" UNSIGNED BIG INT NOT NULL,
-"int2" INT2 NOT NULL,
-"int8" INT8 NOT NULL,
-"character" CHARACTER(20) NOT NULL,
-"varchar" VARCHAR(255) NOT NULL,
-"varying_character" VARYING CHARACTER(255) NOT NULL,
-"nchar" NCHAR(55) NOT NULL,
-"native_character" NATIVE CHARACTER(70) NOT NULL,
-"nvarchar" NVARCHAR(100) NOT NULL,
-"text" TEXT NOT NULL,
-"clob" CLOB NOT NULL,
-"blob" BLOB NOT NULL,
-"real" REAL NOT NULL,
-"double" DOUBLE NOT NULL,
-"double_precision" DOUBLE PRECISION NOT NULL,
-"float" FLOAT NOT NULL,
-"numeric" NUMERIC NOT NULL,
-"decimal" DECIMAL(10,5) NOT NULL,
-"boolean" BOOLEAN NOT NULL,
-"date" DATE NOT NULL,
-"datetime" DATETIME NOT NULL
+"int" INT NULL,
+"integer" INTEGER NULL,
+"tinyint" TINYINT NULL,
+"smallint" SMALLINT NULL,
+"mediumint" MEDIUMINT NULL,
+"bigint" BIGINT NULL,
+"unsigned_big_int" UNSIGNED BIG INT NULL,
+"int2" INT2 NULL,
+"int8" INT8 NULL,
+"character" CHARACTER(20) NULL,
+"varchar" VARCHAR(255) NULL,
+"varying_character" VARYING CHARACTER(255) NULL,
+"nchar" NCHAR(55) NULL,
+"native_character" NATIVE CHARACTER(70) NULL,
+"nvarchar" NVARCHAR(100) NULL,
+"text" TEXT NULL,
+"clob" CLOB NULL,
+"blob" BLOB NULL,
+"real" REAL NULL,
+"double" DOUBLE NULL,
+"double_precision" DOUBLE PRECISION NULL,
+"float" FLOAT NULL,
+"numeric" NUMERIC NULL,
+"decimal" DECIMAL(10,5) NULL,
+"boolean" BOOLEAN NULL,
+"date" DATE NULL,
+"datetime" DATETIME NULL
 );
 INSERT INTO "users" (`name`, `gender`) VALUES ("Edmund","Multigender");
 INSERT INTO "users" (`name`, `gender`) VALUES ("Kyleigh","Cis man");
