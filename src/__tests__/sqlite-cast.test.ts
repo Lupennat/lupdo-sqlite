@@ -23,14 +23,49 @@ describe('Sqlite BigInt Cast', () => {
 
     it('Works All Columns Types', async () => {
         const pdo = new Pdo(pdoData.driver, pdoData.config);
-        const stmt = await pdo.query('SELECT * FROM types;');
-        const row = stmt.fetchDictionary().get() as { [key: string]: ValidBindings };
+        const stmt = await pdo.prepare(
+            'INSERT INTO "types" (`int`,`integer`,`tinyint`,`smallint`,`mediumint`,`bigint`,`unsigned_big_int`,`int2`,`int8`,`character`,`varchar`,`varying_character`,`nchar`,`native_character`,`nvarchar`,`text`,`clob`,`blob`,`real`,`double`,`double_precision`,`float`,`numeric`,`decimal`,`boolean`,`date`,`datetime`)' +
+                'VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
+        );
+        await stmt.execute([
+            10,
+            20,
+            3,
+            4,
+            5,
+            BigInt('-9007199254740992'),
+            BigInt('9007199254740993'),
+            2,
+            4,
+            'character',
+            'varchar',
+            'varying_character',
+            'nchar',
+            'native_character',
+            'nvarchar',
+            'text',
+            'clob',
+            Buffer.from('blob as text'),
+            '900719925474099.1267',
+            '1234.56686767065705',
+            '1234.56686767065706',
+            1234.12,
+            1234567.12,
+            '12345.67890',
+            1,
+            1672504892,
+            1672505549
+        ]);
+        await stmt.close();
+
+        const query = await pdo.query('SELECT * FROM types LIMIT 1;');
+        const row = query.fetchDictionary().get() as { [key: string]: ValidBindings };
         expect(row.int).toBe(10);
         expect(row.integer).toBe(20);
         expect(row.tinyint).toBe(3);
         expect(row.smallint).toBe(4);
         expect(row.mediumint).toBe(5);
-        expect(row.bigint).toEqual(BigInt('9007199254740992'));
+        expect(row.bigint).toEqual(BigInt('-9007199254740992'));
         expect(row.unsigned_big_int).toEqual(BigInt('9007199254740993'));
         expect(row.int2).toBe(2);
         expect(row.int8).toBe(4);
