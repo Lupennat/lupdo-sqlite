@@ -3,7 +3,7 @@ import { PdoRawConnection } from 'lupdo';
 import PdoAffectingData from 'lupdo/dist/typings/types/pdo-affecting-data';
 import PdoColumnData from 'lupdo/dist/typings/types/pdo-column-data';
 import PdoColumnValue from 'lupdo/dist/typings/types/pdo-column-value';
-import { Params, ValidBindings } from 'lupdo/dist/typings/types/pdo-prepared-statement';
+import { Params, ValidBindingsSingle } from 'lupdo/dist/typings/types/pdo-prepared-statement';
 import PdoRowData from 'lupdo/dist/typings/types/pdo-raw-data';
 import { SqlitePoolConnection } from './types';
 
@@ -31,6 +31,13 @@ class SqliteRawConnection extends PdoRawConnection {
     }
 
     protected async executeStatement(
+        statement: Statement,
+        bindings: Params
+    ): Promise<[string, PdoAffectingData, PdoRowData[], PdoColumnData[]]> {
+        return [statement.source, ...(await this.runStatment(statement, bindings))];
+    }
+
+    private async runStatment(
         statement: Statement,
         bindings: Params
     ): Promise<[PdoAffectingData, PdoRowData[], PdoColumnData[]]> {
@@ -76,10 +83,10 @@ class SqliteRawConnection extends PdoRawConnection {
         sql: string
     ): Promise<[PdoAffectingData, PdoRowData[], PdoColumnData[]]> {
         const statement = await this.getStatement(sql, connection);
-        return await this.executeStatement(statement, []);
+        return await this.runStatment(statement, []);
     }
 
-    protected adaptBindValue(value: ValidBindings): ValidBindings {
+    protected adaptBindValue(value: ValidBindingsSingle): ValidBindingsSingle {
         if (value instanceof Date) {
             return value.toISOString();
         }
