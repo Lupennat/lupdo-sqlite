@@ -1,4 +1,4 @@
-import { Pdo } from 'lupdo';
+import { PARAM_BIGINT, PARAM_INTEGER, Pdo, TypedBinding } from 'lupdo';
 import { pdoData } from './fixtures/config';
 
 describe('Sql Prepared Statement', () => {
@@ -100,6 +100,18 @@ describe('Sql Prepared Statement', () => {
         expect(stmt.fetchArray().all().length).toBe(5);
         expect(stmt.fetchArray().all().length).toBe(0);
 
+        await stmt.close();
+    });
+
+    it('Works Statement Bind Typed Binding', async () => {
+        let stmt = await pdo.prepare('SELECT * FROM users limit :limit;');
+        stmt.bindValue('limit', TypedBinding.create(PARAM_BIGINT, BigInt(3)));
+        await stmt.execute();
+        expect(stmt.fetchArray().all().length).toBe(3);
+        await stmt.close();
+        stmt = await pdo.prepare('SELECT ?;');
+        await stmt.execute([TypedBinding.create(PARAM_INTEGER, 1)]);
+        expect(stmt.fetchColumn(0).get()).toBe(1);
         await stmt.close();
     });
 
