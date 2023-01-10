@@ -1,5 +1,5 @@
 import { Statement } from 'better-sqlite3';
-import { PdoRawConnection } from 'lupdo';
+import { PdoRawConnection, TypedBinding } from 'lupdo';
 import PdoAffectingData from 'lupdo/dist/typings/types/pdo-affecting-data';
 import PdoColumnData from 'lupdo/dist/typings/types/pdo-column-data';
 import PdoColumnValue from 'lupdo/dist/typings/types/pdo-column-value';
@@ -93,6 +93,10 @@ class SqliteRawConnection extends PdoRawConnection {
 
         if (typeof value === 'boolean') {
             return Number(value);
+        }
+
+        if (value instanceof TypedBinding) {
+            return this.adaptBindValue(value.value);
         }
 
         return value;
