@@ -61,6 +61,7 @@ Internally lupdo-sqlite convert bigint to normal number if precision will be pre
 > Custom Aggregate and Function must be adapted as required if using numbers.
 
 ## Parameters Binding
+
 Lupdo-sqlite ignore type definition of `TypeBinding` parameter.\
 Lupdo-sqlite does not support array of parameters.
 
