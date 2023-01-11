@@ -1,8 +1,15 @@
 <p align="center">
-	<a href="https://www.npmjs.com/package/lupdo-sqlite" target="__blank"><img src="https://img.shields.io/npm/v/lupdo-sqlite?color=0476bc&label=" alt="NPM version"></a>
-	<a href="https://www.npmjs.com/package/lupdo-sqlite" target="__blank"><img alt="NPM Downloads" src="https://img.shields.io/npm/dm/lupdo-sqlite?color=3890aa&label="></a>
-    <a href="https://codecov.io/github/Lupennat/lupdo-sqlite" >
+	<a href="https://www.npmjs.com/package/lupdo-sqlite" target="__blank">
+        <img src="https://img.shields.io/npm/v/lupdo-sqlite?color=0476bc&label=" alt="NPM version">
+    </a>
+	<a href="https://www.npmjs.com/package/lupdo-sqlite" target="__blank">
+        <img alt="NPM Downloads" src="https://img.shields.io/npm/dm/lupdo-sqlite?color=3890aa&label=">
+    </a>
+    <a href="https://app.codecov.io/github/Lupennat/lupdo-sqlite" target="__blank">
         <img src="https://codecov.io/github/Lupennat/lupdo-sqlite/branch/main/graph/badge.svg?token=19C8E6QTCE"/>
+    </a>
+    <a href="https://snyk.io/test/github/lupennat/lupdo-sqlite" target="__blank">
+        <img src="https://snyk.io/test/github/lupennat/lupdo-sqlite/badge.svg">
     </a>
 </p>
 
