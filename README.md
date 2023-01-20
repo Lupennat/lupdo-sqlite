@@ -32,13 +32,11 @@ Lupdo-sqlite, under the hood, uses stable and performant npm packages:
 Base Example
 
 ```js
-const Pdo = require('lupdo');
-require('lupdo-sqlite');
+const { createSqlitePdo } = require("lupdo-sqlite");
 // ES6 or Typescrypt
-import Pdo from 'lupdo';
-import 'ludpo-sqlite';
+import {createSqlitePdo} from 'ludpo-sqlite';
 
-const pdo = new Pdo('sqlite', { path: ':memory' }, { min: 2, max: 3 });
+const pdo = createSqlitePdo({ path: ':memory' }, { min: 2, max: 3 });
 const run = async () => {
     const statement = await pdo.query('SELECT 2');
     const res = statement.fetchArray().all();
