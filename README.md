@@ -32,13 +32,11 @@ Lupdo-sqlite, under the hood, uses stable and performant npm packages:
 Base Example
 
 ```js
-const Pdo = require('lupdo');
-require('lupdo-sqlite');
+const { createSqlitePdo } = require("lupdo-sqlite");
 // ES6 or Typescrypt
-import Pdo from 'lupdo';
-import 'ludpo-sqlite';
+import { createSqlitePdo } from 'ludpo-sqlite';
 
-const pdo = new Pdo('sqlite', { path: ':memory' }, { min: 2, max: 3 });
+const pdo = createSqlitePdo({ path: ':memory' }, { min: 2, max: 3 });
 const run = async () => {
     const statement = await pdo.query('SELECT 2');
     const res = statement.fetchArray().all();
@@ -95,9 +93,9 @@ Here You can find more details on [aggregate](https://github.com/WiseLibs/better
 > The `SqliteDriver.createFunction(name, options)` differs from the original `better-sqlite3.function(name, [options], function)`, it accepts only a name and a config, config must contains `execute` function.
 
 ```ts
-import { Pdo } from 'lupdo';
-import 'lupdo-sqlite';
-import { SqliteDriver } from 'lupdo-sqlite';
+const { createSqlitePdo, SqliteDriver } = require("lupdo-sqlite");
+// ES6 or Typescrypt
+import { createSqlitePdo, SqliteDriver } from 'ludpo-sqlite';
 
 SqliteDriver.createAggregate('max_len', {
     start: 0,
@@ -115,7 +113,7 @@ SqliteDriver.createFunction('add2', {
     }
 });
 
-const pdo = new Pdo('sqlite3', { path: './test.db' });
+const pdo = createSqlitePdo({ path: './test.db' });
 
 await pdo.query('SELECT max_len(name) FROM companies;');
 await pdo.query('SELECT add2(name, gender) FROM users;');

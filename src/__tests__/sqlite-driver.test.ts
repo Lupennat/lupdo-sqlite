@@ -10,8 +10,9 @@ import {
     PdoTransaction
 } from 'lupdo';
 
+import { createSqlitePdo } from '..';
 import SqliteDriver from '../sqlite-driver';
-import { pdoData } from './fixtures/config';
+import { drivers, pdoData } from './fixtures/config';
 
 describe('Sqlite Driver', () => {
     const pdo = new Pdo(pdoData.driver, pdoData.config);
@@ -166,6 +167,12 @@ describe('Sqlite Driver', () => {
         await pdo.query('SELECT 1');
         expect(console.log).toHaveBeenCalled();
         expect(queries.length).toBeGreaterThan(0);
+        await pdo.disconnect();
+    });
+
+    it('Work createSqlitePdo', async () => {
+        const pdo = createSqlitePdo(drivers.options);
+        expect(pdo).toBeInstanceOf(Pdo);
         await pdo.disconnect();
     });
 
