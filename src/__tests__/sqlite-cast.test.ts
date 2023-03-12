@@ -9,6 +9,15 @@ describe('Sqlite BigInt Cast', () => {
         let stmt = await pdo.query("SELECT CAST('9007199254740992' as SIGNED INTEGER)");
         expect(stmt.fetchColumn(0).get()).toEqual(BigInt('9007199254740992'));
 
+        stmt = await pdo.query('SELECT 123456789.10');
+        expect(stmt.fetchColumn(0).get()).toEqual('123456789.1');
+
+        stmt = await pdo.query('SELECT 123456789.000');
+        expect(stmt.fetchColumn(0).get()).toEqual(123456789);
+
+        stmt = await pdo.query('SELECT -9007199254740992');
+        expect(stmt.fetchColumn(0).get()).toEqual(BigInt('-9007199254740992'));
+
         stmt = await pdo.query("SELECT CAST('-9007199254740992' as SIGNED INTEGER)");
         expect(stmt.fetchColumn(0).get()).toEqual(BigInt('-9007199254740992'));
 
@@ -17,6 +26,10 @@ describe('Sqlite BigInt Cast', () => {
 
         stmt = await pdo.query("SELECT CAST('-9007199254740991' as SIGNED INTEGER)");
         expect(stmt.fetchColumn(0).get()).toEqual(-9007199254740991);
+
+        // precision is lost bigint is returned without precision
+        stmt = await pdo.query('select 111111111111111111111111111111111111111111111111 as abc');
+        expect(typeof stmt.fetchColumn(0).get()).toBe('bigint');
 
         await pdo.disconnect();
     });
@@ -47,9 +60,9 @@ describe('Sqlite BigInt Cast', () => {
             'clob',
             Buffer.from('blob as text'),
             '900719925474099.1267',
-            '1234.56686767065705',
+            1234,
             '1234.56686767065706',
-            1234.12,
+            1234.0,
             '1234567.1200',
             '12345.67890',
             1,
@@ -110,9 +123,9 @@ describe('Sqlite BigInt Cast', () => {
         expect(row.clob).toBe('clob');
         expect(row.blob).toEqual(Buffer.from('blob as text'));
         expect(row.real).toBe('900719925474099.1');
-        expect(row.double).toBe('1234.566867670657');
+        expect(row.double).toBe('1234');
         expect(row.double_precision).toBe('1234.566867670657');
-        expect(row.float).toBe('1234.12');
+        expect(row.float).toBe('1234');
         expect(row.numeric).toBe('1234567.12');
         expect(row.decimal).toBe('12345.6789');
         expect(row.boolean).toBe(1);

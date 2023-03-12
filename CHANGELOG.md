@@ -5,6 +5,16 @@ All notable changes to this project from 1.0.0 forward will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2023-03-12
+
+### Changed
+
+-   number are always returned as string when column type is defined as not integer to improve lupdo compatibility, but precision is always lost
+
+### Fixed
+
+-   bigint without precision will be casted to bigint
+
 ## [1.2.1] - 2023-01-20
 
 ### Added

@@ -43,6 +43,15 @@ class SqliteRawConnection extends PdoRawConnection {
     ): Promise<[PdoAffectingData, PdoRowData[], PdoColumnData[]]> {
         statement.safeIntegers(true);
         const info = await statement.run(bindings);
+        const columns = (statement.reader ? statement.columns() : []).map(field => {
+            return {
+                name: field.name,
+                column: field.column,
+                table: field.table ?? '',
+                database: field.database,
+                type: field.type
+            };
+        });
         return [
             statement.reader
                 ? {}
@@ -55,22 +64,18 @@ class SqliteRawConnection extends PdoRawConnection {
                       .raw()
                       .all(bindings)
                       .map((row: PdoColumnValue[]) => {
-                          return row.map(value =>
-                              typeof value === 'bigint' || typeof value === 'number'
-                                  ? this.convertToSafeNumber(value)
-                                  : value
-                          );
+                          return row.map((value, index) => {
+                              const column = columns[index];
+                              if (column && (column.type === null || this.shouldBeNumber(column.type))) {
+                                  return typeof value === 'bigint' || typeof value === 'number'
+                                      ? this.convertToSafeNumber(value)
+                                      : value;
+                              }
+                              return typeof value === 'bigint' || typeof value === 'number' ? value.toString() : value;
+                          });
                       })
                 : [],
-            (statement.reader ? statement.columns() : []).map(field => {
-                return {
-                    name: field.name,
-                    column: field.column,
-                    table: field.table ?? '',
-                    database: field.database,
-                    type: field.type
-                };
-            })
+            columns
         ];
     }
 
@@ -102,16 +107,41 @@ class SqliteRawConnection extends PdoRawConnection {
         return value;
     }
 
+    protected shouldBeNumber(value: string): boolean {
+        return [
+            'DATE',
+            'DATETIME',
+            'BOOLEAN',
+            'INT',
+            'INTEGER',
+            'TINYINT',
+            'SMALLINT',
+            'MEDIUMINT',
+            'BIGINT',
+            'UNSIGNED BIG INT',
+            'INT2',
+            'INT8'
+        ].includes(value.toUpperCase());
+    }
+
     protected convertToSafeNumber(valueToCheck: number | bigint): string | number | bigint {
         if (typeof valueToCheck !== 'bigint' && valueToCheck % 1 !== 0) {
             return valueToCheck.toString();
         }
         const stringValue = valueToCheck.toString();
-        const bigInt = BigInt(stringValue);
+        try {
+            return this.converToBigIntOrNumber(stringValue);
+        } catch (error) {
+            return this.converToBigIntOrNumber(valueToCheck);
+        }
+    }
+
+    protected converToBigIntOrNumber(value: string | number | bigint): number | bigint {
+        const bigInt = BigInt(value);
         if (bigInt > Number.MAX_SAFE_INTEGER || bigInt < Number.MIN_SAFE_INTEGER) {
             return bigInt;
         }
-        return Number(stringValue);
+        return Number(value);
     }
 }
 
