@@ -7,4 +7,8 @@ export interface SqlitePoolConnection extends sqlite.Database {
 
 export interface SqliteOptions extends sqlite.Options {
     path: string;
+    wal?: boolean;
+    walSynchronous?: 'OFF' | 'NORMAL' | 'FULL' | 'EXTRA';
+    walMaxSize?: number;
+    onWalError?: (err: any) => void | Promise<void>;
 }
