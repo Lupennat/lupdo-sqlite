@@ -62,6 +62,7 @@ new optional option added
 -   maxSize: number [default undefined] (MB)
 -   onWalError: (err) => void [default undefined]
 
+When WAL is disabled default `journal_mode` will be `delete` for database file and `memory` for memory database.\
 When WAL is enabled and `maxSize` is defined every 5 seconds lupdo-sqlite will check if WAL file is bigger than maxSize, if size is greater than maxSize [wal_checkpoint(TRUNCATE)](https://www.sqlite.org/pragma.html#pragma_wal_checkpoint) is called.\
 When WAL watcher get an error it will call your custom `onWalError` callback with the original error.\
 Sqlite only creates the WAL file when it is needed, which is why it may not exist, here is an example:
