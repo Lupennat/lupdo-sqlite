@@ -71,7 +71,7 @@
     "dependencies": {
         "@types/better-sqlite3": "^7.6.2",
         "better-sqlite3": "^7.6.2",
-        "lupdo": "^3.0.0",
+        "lupdo": "^3.1.6",
         "tslib": "^2.4.1"
     }
 }

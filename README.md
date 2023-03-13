@@ -32,7 +32,7 @@ Lupdo-sqlite, under the hood, uses stable and performant npm packages:
 Base Example
 
 ```js
-const { createSqlitePdo } = require("lupdo-sqlite");
+const { createSqlitePdo } = require('lupdo-sqlite');
 // ES6 or Typescrypt
 import { createSqlitePdo } from 'ludpo-sqlite';
 
@@ -54,6 +54,34 @@ run();
 new required option added:
 
 -   path: string
+
+new optional option added
+
+-   [wal: boolean](https://www.sqlite.org/wal.html) [default `false`]
+-   [synchronous: string](https://sqlite.org/pragma.html#pragma_synchronous) [default `NORMAL` works only when WAL enabled]
+-   maxSize: number [default undefined] (MB)
+-   onWalError: (err) => void [default undefined]
+
+When WAL is disabled default `journal_mode` will be `delete` for database file and `memory` for memory database.\
+When WAL is enabled and `maxSize` is defined every 5 seconds lupdo-sqlite will check if WAL file is bigger than maxSize, if size is greater than maxSize [wal_checkpoint(TRUNCATE)](https://www.sqlite.org/pragma.html#pragma_wal_checkpoint) is called.\
+When WAL watcher get an error it will call your custom `onWalError` callback with the original error.\
+Sqlite only creates the WAL file when it is needed, which is why it may not exist, here is an example:
+
+```ts
+const pdo = createSqlitePdo(
+    {
+        path: 'sqlitefile.db',
+        wal: true,
+        maxSize: 100,
+        onWalError: (err: any) => {
+            if (err.code !== 'ENOENT') {
+                // log the error on your application
+            }
+        }
+    },
+    { min: 2, max: 3 }
+);
+```
 
 ## Better Sqlite Overrides
 
@@ -93,7 +121,7 @@ Here You can find more details on [aggregate](https://github.com/WiseLibs/better
 > The `SqliteDriver.createFunction(name, options)` differs from the original `better-sqlite3.function(name, [options], function)`, it accepts only a name and a config, config must contains `execute` function.
 
 ```ts
-const { createSqlitePdo, SqliteDriver } = require("lupdo-sqlite");
+const { createSqlitePdo, SqliteDriver } = require('lupdo-sqlite');
 // ES6 or Typescrypt
 import { createSqlitePdo, SqliteDriver } from 'ludpo-sqlite';
 

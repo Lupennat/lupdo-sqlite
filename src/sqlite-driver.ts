@@ -1,8 +1,10 @@
 import Database from 'better-sqlite3';
 
+import { stat } from 'node:fs/promises';
+
 import { ATTR_DEBUG, DEBUG_ENABLED, PdoConnectionI, PdoDriver, PdoRawConnectionI } from 'lupdo';
 import PdoAttributes from 'lupdo/dist/typings/types/pdo-attributes';
-import { PoolOptions } from 'lupdo/dist/typings/types/pdo-pool';
+import { PoolConnection, PoolI, PoolOptions } from 'lupdo/dist/typings/types/pdo-pool';
 import SqliteConnection from './sqlite-connection';
 import SqliteRawConnection from './sqlite-raw-connection';
 import { SqliteOptions, SqlitePoolConnection } from './types';
@@ -13,6 +15,9 @@ export interface SqliteFunctionOptions extends Database.RegistrationOptions {
 }
 
 class SqliteDriver extends PdoDriver {
+    protected walWatcherInterval: NodeJS.Timer | undefined;
+    protected options: SqliteOptions;
+
     protected static aggregateFunctions: {
         [key: string]: SqliteAggregateOptions;
     } = {};
@@ -21,12 +26,33 @@ class SqliteDriver extends PdoDriver {
         [key: string]: SqliteFunctionOptions;
     } = {};
 
-    constructor(driver: string, protected options: SqliteOptions, poolOptions: PoolOptions, attributes: PdoAttributes) {
+    constructor(driver: string, options: SqliteOptions, poolOptions: PoolOptions, attributes: PdoAttributes) {
         super(driver, poolOptions, attributes);
+        if (this.isMemoryDatabase(options.path)) {
+            options.wal = false;
+            options.walSynchronous = undefined;
+            options.walMaxSize = undefined;
+            options.onWalError = undefined;
+        }
+        this.options = options;
+    }
+
+    protected isMemoryDatabase(path: string): boolean {
+        return path.toLowerCase() === ':memory:';
+    }
+
+    protected get pool(): PoolI<PoolConnection> {
+        if (this.walWatcherInterval === undefined) {
+            if (this.options.wal && this.options.walMaxSize) {
+                this.enableWalWatcher(this.options.walMaxSize);
+            }
+        }
+
+        return super.pool;
     }
 
     protected async createConnection(unsecure = false): Promise<SqlitePoolConnection> {
-        const { path, ...sqliteOptions } = this.options;
+        const { path, wal, walSynchronous, ...sqliteOptions } = this.options;
         const debugMode = this.getAttribute(ATTR_DEBUG) as number;
 
         if (!unsecure && debugMode === DEBUG_ENABLED) {
@@ -39,7 +65,7 @@ class SqliteDriver extends PdoDriver {
             };
         }
 
-        const db = new Database(path, sqliteOptions);
+        const db = new Database(path, sqliteOptions) as SqlitePoolConnection;
 
         for (const name in SqliteDriver.aggregateFunctions) {
             db.aggregate(name, SqliteDriver.aggregateFunctions[name]);
@@ -56,7 +82,52 @@ class SqliteDriver extends PdoDriver {
             db.defaultSafeIntegers(true);
         }
 
-        return db as SqlitePoolConnection;
+        if (wal) {
+            await db.pragma('journal_mode = WAL');
+            await db.pragma(`synchronous = ${walSynchronous ?? 'NORMAL'}`);
+        } else {
+            await db.pragma(`journal_mode = ${this.isMemoryDatabase(path) ? 'memory' : 'delete'}`);
+        }
+
+        return db;
+    }
+
+    public async disconnect(): Promise<void> {
+        return super.disconnect();
+    }
+
+    protected enableWalWatcher(walMaxSize: number): void {
+        this.emit('log', 'debug', `WAL enabled with max size ${walMaxSize}mb.`);
+        this.walWatcherInterval = setInterval(async () => {
+            if (this.disconnected) {
+                clearInterval(this.walWatcherInterval);
+                this.walWatcherInterval = undefined;
+            } else {
+                const path = this.options.path + '-wal';
+                try {
+                    const sizeInMB = await this.getFileSizeInMb(path);
+                    if (sizeInMB > walMaxSize) {
+                        const newConn = await this.createConnection();
+                        await newConn.pragma('wal_checkpoint(TRUNCATE)');
+                        await newConn.close();
+                        this.emit(
+                            'log',
+                            'warning',
+                            `WAL checkpoint TRUNCATE called, file size ${sizeInMB}mb is greater than ${walMaxSize}mb.`
+                        );
+                    }
+                } catch (err: any) {
+                    if (typeof this.options.onWalError === 'function') {
+                        await this.options.onWalError(err);
+                    }
+                }
+            }
+        }, 5000).unref();
+    }
+
+    protected async getFileSizeInMb(path: string): Promise<number> {
+        const stats = await stat(path);
+        return Math.round(stats.size * 0.0001) / 100;
     }
 
     protected createPdoConnection(connection: SqlitePoolConnection): PdoConnectionI {
