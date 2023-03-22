@@ -367,7 +367,6 @@ describe('Sqlite Driver', () => {
                 expect(connection.version.startsWith('3')).toBeTruthy();
             }
         });
-        expect((await pdo.getVersion()).startsWith('3')).toBeTruthy();
         await pdo.query('SELECT 1');
         await pdo.disconnect();
     });
