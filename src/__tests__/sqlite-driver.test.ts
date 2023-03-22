@@ -356,6 +356,22 @@ describe('Sqlite Driver', () => {
         await pdo.disconnect();
     });
 
+    it('Work Get Version', async () => {
+        const pdo = createSqlitePdo(pdoData.config);
+        expect((await pdo.getVersion()).startsWith('3')).toBeTruthy();
+    });
+
+    it('Works Pdo Connection Version', async () => {
+        const pdo = createSqlitePdo(pdoData.config, {
+            created: (uuid, connection) => {
+                expect(connection.version.startsWith('3')).toBeTruthy();
+            }
+        });
+        expect((await pdo.getVersion()).startsWith('3')).toBeTruthy();
+        await pdo.query('SELECT 1');
+        await pdo.disconnect();
+    });
+
     it('Works Destroy Connection Does not kill connection', async () => {
         console.log = jest.fn();
         console.trace = jest.fn();
