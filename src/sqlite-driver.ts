@@ -147,6 +147,12 @@ class SqliteDriver extends PdoDriver {
         return true;
     }
 
+    protected async getVersionFromConnection(connection: SqlitePoolConnection): Promise<string> {
+        const stmt = connection.prepare('SELECT sqlite_version() as version');
+        const res = await stmt.get();
+        return res.version as string;
+    }
+
     public getRawConnection(): PdoRawConnectionI {
         return new SqliteRawConnection(this.pool);
     }
