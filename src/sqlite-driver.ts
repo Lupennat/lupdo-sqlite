@@ -9,7 +9,16 @@ import SqliteConnection from './sqlite-connection';
 import SqliteRawConnection from './sqlite-raw-connection';
 import { SqliteOptions, SqlitePoolConnection } from './types';
 
-export type SqliteAggregateOptions = Database.AggregateOptions;
+export interface SqliteAggregateOptions {
+    varargs?: boolean | undefined;
+    deterministic?: boolean | undefined;
+    safeIntegers?: boolean | undefined;
+    directOnly?: boolean | undefined;
+    start?: any | (() => any);
+    step: (total: any, next: any) => any | void;
+    inverse?: ((total: any, dropped: any) => any) | undefined;
+    result?: ((total: any) => any) | undefined;
+}
 export interface SqliteFunctionOptions extends Database.RegistrationOptions {
     execute: (...params: any[]) => any;
 }
@@ -100,7 +109,7 @@ class SqliteDriver extends PdoDriver {
         this.emit('log', 'debug', `WAL enabled with max size ${walMaxSize}mb.`);
         this.walWatcherInterval = setInterval(async () => {
             if (this.disconnected) {
-                clearInterval(this.walWatcherInterval);
+                clearInterval(this.walWatcherInterval as NodeJS.Timeout);
                 this.walWatcherInterval = undefined;
             } else {
                 const path = this.options.path + '-wal';
@@ -149,8 +158,8 @@ class SqliteDriver extends PdoDriver {
 
     protected async getVersionFromConnection(connection: SqlitePoolConnection): Promise<string> {
         const stmt = connection.prepare('SELECT sqlite_version() as version');
-        const res = await stmt.get();
-        return res.version as string;
+        const res = (await stmt.get()) as { version: string };
+        return res.version;
     }
 
     public getRawConnection(): PdoRawConnectionI {

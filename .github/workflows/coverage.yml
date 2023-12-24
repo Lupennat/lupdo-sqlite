@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [14.x, 16.x, 18.x]
+        node-version: [ 16.x, 18.x]
         database-type: [sqlite3]
 
     steps:
@@ -27,7 +27,7 @@ jobs:
         run: sqlite3 .${{ matrix.database-type }}.db < src/__tests__/data/sqlite.sql
 
       - name: Run npm install
-        run: npm install
+        run: npm ci
 
       - name: Build and test
         run: |
