@@ -293,7 +293,11 @@ describe('Sqlite Driver', () => {
         const conn = await pdo.getRawDriverConnection<Connection>();
         expect(conn).toBeInstanceOf(Database);
         conn.defaultSafeIntegers(true);
-        const row = conn.prepare('SELECT * FROM users WHERE id = ?').get(1);
+        const row = conn.prepare('SELECT * FROM users WHERE id = ?').get(1) as {
+            id: string;
+            name: string;
+            gender: string;
+        };
         expect(row.id).toEqual(BigInt(1));
         expect(row.name).toBe('Edmund');
         expect(row.gender).toBe('Multigender');

@@ -52,6 +52,7 @@ class SqliteRawConnection extends PdoRawConnection {
                 type: field.type
             };
         });
+
         return [
             statement.reader
                 ? {}
@@ -60,20 +61,17 @@ class SqliteRawConnection extends PdoRawConnection {
                       affectedRows: info.changes
                   },
             statement.reader
-                ? statement
-                      .raw()
-                      .all(bindings)
-                      .map((row: PdoColumnValue[]) => {
-                          return row.map((value, index) => {
-                              const column = columns[index];
-                              if (column && (column.type === null || this.shouldBeNumber(column.type))) {
-                                  return typeof value === 'bigint' || typeof value === 'number'
-                                      ? this.convertToSafeNumber(value)
-                                      : value;
-                              }
-                              return typeof value === 'bigint' || typeof value === 'number' ? value.toString() : value;
-                          });
-                      })
+                ? (statement.raw().all(bindings) as PdoRowData[]).map((row: PdoColumnValue[]) => {
+                      return row.map((value, index) => {
+                          const column = columns[index];
+                          if (column && (column.type === null || this.shouldBeNumber(column.type))) {
+                              return typeof value === 'bigint' || typeof value === 'number'
+                                  ? this.convertToSafeNumber(value)
+                                  : value;
+                          }
+                          return typeof value === 'bigint' || typeof value === 'number' ? value.toString() : value;
+                      });
+                  })
                 : [],
             columns
         ];
