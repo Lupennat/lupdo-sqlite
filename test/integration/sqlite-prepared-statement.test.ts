@@ -1,4 +1,10 @@
-import { PARAM_BIGINT, PARAM_INTEGER, Pdo, TypedBinding } from 'lupdo';
+import {
+  NumericTypedBinding,
+  PARAM_BIGINT,
+  PARAM_DECIMAL,
+  Pdo,
+  TypedBinding,
+} from 'lupdo';
 
 import { pdoData } from '../fixtures/config';
 
@@ -115,8 +121,8 @@ describe('Sql Prepared Statement', () => {
     expect(stmt.fetchArray().all().length).toBe(3);
     await stmt.close();
     stmt = await pdo.prepare('SELECT ?;');
-    await stmt.execute([new TypedBinding(PARAM_INTEGER, 1)]);
-    expect(stmt.fetchColumn(0).get()).toBe(1);
+    await stmt.execute([new NumericTypedBinding(PARAM_DECIMAL, '1')]);
+    expect(stmt.fetchColumn(0).get()).toBe('1');
     await stmt.close();
   });
 

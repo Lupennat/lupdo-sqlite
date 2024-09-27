@@ -1,12 +1,12 @@
 import { Statement } from 'better-sqlite3';
 import {
+  BaseTypedBinding,
   Params,
   PdoAffectingData,
   PdoColumnData,
   PdoColumnValue,
   PdoRawConnection,
   PdoRowData,
-  TypedBinding,
   ValidBindingsSingle,
 } from 'lupdo';
 
@@ -120,7 +120,7 @@ export class SqliteRawConnection extends PdoRawConnection {
       return Number(value);
     }
 
-    if (value instanceof TypedBinding) {
+    if (value instanceof BaseTypedBinding) {
       return this.adaptBindValue(value.value);
     }
 
