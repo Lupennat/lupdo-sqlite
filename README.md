@@ -1,8 +1,8 @@
 <p align="center">
-	<a href="https://www.npmjs.com/package/lupdo-sqlite" target="__blank">
+ <a href="https://www.npmjs.com/package/lupdo-sqlite" target="__blank">
         <img src="https://img.shields.io/npm/v/lupdo-sqlite?color=0476bc&label=" alt="NPM version">
     </a>
-	<a href="https://www.npmjs.com/package/lupdo-sqlite" target="__blank">
+ <a href="https://www.npmjs.com/package/lupdo-sqlite" target="__blank">
         <img alt="NPM Downloads" src="https://img.shields.io/npm/dm/lupdo-sqlite?color=3890aa&label=">
     </a>
     <a href="https://app.codecov.io/github/Lupennat/lupdo-sqlite" target="__blank">
@@ -16,16 +16,17 @@
 # Lupdo-sqlite
 
 [Lupdo](https://www.npmjs.com/package/lupdo) Driver For Sqlite.
+[Api](https://lupdo-sqlite.lupennat.com/api/functions/createSqlitePdo.html)
 
 ## Supported Databases
 
--   [sqlite/sqlite3](https://www.sqlite.org/index.html)
+- [sqlite/sqlite3](https://www.sqlite.org/index.html)
 
 ## Third Party Library
 
 Lupdo-sqlite, under the hood, uses stable and performant npm packages:
 
--   [better-sqlite3](https://github.com/WiseLibs/better-sqlite3)
+- [better-sqlite3](https://github.com/WiseLibs/better-sqlite3)
 
 ## Usage
 
@@ -53,14 +54,14 @@ run();
 
 new required option added:
 
--   path: string
+- path: string
 
 new optional option added
 
--   [wal: boolean](https://www.sqlite.org/wal.html) [default `false`]
--   [synchronous: string](https://sqlite.org/pragma.html#pragma_synchronous) [default `NORMAL` works only when WAL enabled]
--   maxSize: number [default undefined] (MB)
--   onWalError: (err) => void [default undefined]
+- [wal: boolean](https://www.sqlite.org/wal.html) [default `false`]
+- [synchronous: string](https://sqlite.org/pragma.html#pragma_synchronous) [default `NORMAL` works only when WAL enabled]
+- maxSize: number [default undefined] (MB)
+- onWalError: (err) => void [default undefined]
 
 When WAL is disabled default `journal_mode` will be `delete` for database file and `memory` for memory database.\
 When WAL is enabled and `maxSize` is defined every 5 seconds lupdo-sqlite will check if WAL file is bigger than maxSize, if size is greater than maxSize [wal_checkpoint(TRUNCATE)](https://www.sqlite.org/pragma.html#pragma_wal_checkpoint) is called.\

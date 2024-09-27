@@ -6,36 +6,26 @@ on:
       - main
 
 jobs:
-  build:
+  coverage:
     runs-on: ubuntu-latest
-
-    strategy:
-      fail-fast: false
-      matrix:
-        node-version: [ 16.x, 18.x]
-        database-type: [sqlite3]
-
     steps:
       - uses: actions/checkout@v3
 
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 22.x
 
       - name: Start Database
-        run: sqlite3 .${{ matrix.database-type }}.db < src/__tests__/data/sqlite.sql
+        run: sqlite3 .sqlite3.db < .devcontainer/init/sqlite.sql
 
       - name: Run npm install
         run: npm ci
 
-      - name: Build and test
-        run: |
-          npm run build
-          npm run test:coverage
+      - name: Coverage
+        run: npm run test:coverage
         env:
           CI: true
-          DB: ${{ matrix.database-type }}
 
       - name: Code Coverage Report
         uses: irongut/CodeCoverageSummary@v1.3.0
@@ -51,8 +41,7 @@ jobs:
           thresholds: '75 90'
 
       - name: Upload coverage to Codecov
-        if:  ${{ matrix.database-type == 'sqlite3' && matrix.node-version == '18.x'}}
         uses: codecov/codecov-action@v3
 
       - name: Stop Database
-        run: rm .${{ matrix.database-type }}.db
+        run: rm .sqlite3.db
