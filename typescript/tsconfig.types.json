@@ -1,11 +1,20 @@
 {
-    "extends": "./tsconfig.base.json",
+    "extends": "../tsconfig.json",
     "compilerOptions": {
+        "moduleResolution": "node",
+        "sourceMap": false,
+        "incremental": false,
         "module": "ES2020",
         "target": "esnext",
         "removeComments": false,
         "declaration": true,
-        "declarationDir": "../dist/typings",
+        "declarationDir": "../dist/types",
         "emitDeclarationOnly": true
-    }
+    },
+    "include": [
+        "../src/"
+    ],
+    "exclude": [
+        "../**/*.test.ts"
+    ]
 }

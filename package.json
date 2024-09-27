@@ -1,77 +1,139 @@
 {
-    "name": "lupdo-sqlite",
-    "version": "1.5.1",
-    "description": "Sqlite Driver For Lupdo",
-    "author": "Claudio Pennati <claudio.pennati@gmail.com>",
-    "license": "MIT",
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/Lupennat/lupdo-sqlite.git"
-    },
-    "keywords": [
-        "database",
-        "abstraction",
-        "layer",
-        "pdo",
-        "sqlite",
-        "sqlite3",
-        "lupdo"
-    ],
-    "main": "dist/cjs/index.js",
-    "module": "./dist/esm/index.js",
-    "types": "./dist/typings/index.d.ts",
-    "exports": {
-        ".": {
-            "require": "./dist/cjs/index.js",
-            "import": "./dist/esm/index.js",
-            "types": "./dist/typings/index.d.ts"
-        }
-    },
-    "publishConfig": {
-        "access": "public"
-    },
-    "scripts": {
-        "prepublishOnly": "safe-publish-latest && npm run build",
-        "prepublish": "not-in-publish || npm run prepublishOnly",
-        "build": "npm run clean && npm run build:cjs && npm run build:esm && npm run build:types",
-        "build:cjs": "tsc",
-        "build:esm": "tsc -p ./typescript/tsconfig.esm.json",
-        "build:types": "tsc -p ./typescript/tsconfig.types.json",
-        "clean": "rimraf ./dist",
-        "local:test": "npm run db:up && npm run test:sqlite3 && npm run db:down",
-        "local:coverage": "npm run db:up && npm run test:sqlite3:coverage && npm run db:down",
-        "test:sqlite3": "npm run lint && cross-env DB=sqlite3 jest --config test/jest.config.js",
-        "test:sqlite3:coverage": "npm run lint && cross-env DB=sqlite3 jest --config test/jest.config.js --coverage",
-        "test:db": "npm run lint && jest --config test/jest.config.js",
-        "test:coverage": "npm run lint && jest --config test/jest.config.js --coverage",
-        "lint": "eslint --ext \".js,.jsx,.ts,.tsx\" \"./src\"",
-        "lint:fix": "eslint --fix --ext \".js,.jsx,.ts,.tsx\" \"./src\"",
-        "db:up": "sqlite3 .sqlite3.db < src/__tests__/data/sqlite.sql",
-        "db:down": "rimraf .sqlite3.db"
-    },
-    "engines": {
-        "node": "^16.10.0 || >=18.0.0"
-    },
-    "devDependencies": {
-        "@types/jest": "^29.2.4",
-        "@typescript-eslint/eslint-plugin": "^5.46.1",
-        "@typescript-eslint/parser": "^5.46.1",
-        "cross-env": "^7.0.3",
-        "eslint": "^8.29.0",
-        "eslint-config-prettier": "^8.5.0",
-        "eslint-plugin-prettier": "^4.2.1",
-        "jest": "^29.3.1",
-        "prettier": "^2.8.1",
-        "reflect-metadata": "^0.1.13",
-        "rimraf": "^3.0.2",
-        "safe-publish-latest": "^2.0.0",
-        "ts-jest": "^29.0.3",
-        "typescript": "^4.9.4"
-    },
-    "dependencies": {
-        "@types/better-sqlite3": "^7.6.2",
-        "better-sqlite3": "^7.6.2",
-        "lupdo": "^3.4.0",
-        "tslib": "^2.4.1"
+  "name": "lupdo-sqlite",
+  "version": "2.0.0",
+  "description": "Sqlite Driver For Lupdo",
+  "author": "Claudio Pennati <claudio.pennati@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Lupennat/lupdo-sqlite.git"
+  },
+  "keywords": [
+    "database",
+    "abstraction",
+    "layer",
+    "pdo",
+    "sqlite",
+    "sqlite3",
+    "lupdo"
+  ],
+  "main": "dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/cjs/index.js",
+      "import": "./dist/esm/index.js",
+      "types": "./dist/types/index.d.ts"
     }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "rimraf -rf dist && npm run build:cjs && npm run build:esm && npm run build:types",
+    "build:cjs": "tsc  -p ./typescript/tsconfig.cjs.json",
+    "build:esm": "tsc -p ./typescript/tsconfig.esm.json",
+    "build:types": "tsc -p ./typescript/tsconfig.types.json",
+    "docs:api": "npx typedoc --logLevel Error --excludeExternals --excludeProtected --excludePrivate --out ./docs/api/ --readme none src/index.ts",
+    "docs:md:index": "npx markdown-to-html --output ./docs/index.html --source ./README.md",
+    "docs:md:changelog": "npx markdown-to-html --output ./docs/changelog.html --source ./CHANGELOG.md",
+    "docs:md": "npm run docs:md:index && npm run docs:md:changelog",
+    "docs": "rimraf ./docs && npm run docs:api && npm run docs:md",
+    "lint": "eslint \"{src,test}/**/*.ts\"",
+    "lint:fix": "eslint \"{src,test}/**/*.ts\" --fix",
+    "prepublishOnly": "safe-publish-latest && npm run build",
+    "prepublish": "not-in-publish || npm run prepublishOnly",
+    "test:coverage": "jest --passWithNoTests --selectProjects unit integration --coverage --runInBand",
+    "test:unit": "jest --passWithNoTests --selectProjects unit --runInBand",
+    "test:integration": "jest --passWithNoTests --selectProjects integration --runInBand"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.2",
+    "@types/node": "^20.10.6",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "eslint": "^8.42.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "eslint-plugin-simple-import-sort": "^12.1.0",
+    "eslint-plugin-unused-imports": "^3.2.0",
+    "jest": "^29.5.0",
+    "markdown-to-html-cli": "^4.0.3",
+    "prettier": "^3.0.0",
+    "rimraf": "^5.0.5",
+    "safe-publish-latest": "^2.0.0",
+    "ts-jest": "^29.1.0",
+    "ts-loader": "^9.4.3",
+    "ts-node": "^10.9.1",
+    "tsconfig-paths": "^4.2.0",
+    "typedoc": "^0.25.6",
+    "typescript": "^5.1.3"
+  },
+  "peerDependencies": {
+    "lupdo": "^4.0.1"
+  },
+  "dependencies": {
+    "@types/better-sqlite3": "^7.6.11",
+    "better-sqlite3": "^11.3.0",
+    "tslib": "^2.7.0"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
+    "projects": [
+      {
+        "displayName": "unit",
+        "testMatch": [
+          "<rootDir>/src/*.test.ts"
+        ],
+        "transform": {
+          "^.+\\.(t|j)s$": "ts-jest"
+        },
+        "testEnvironment": "node",
+        "setupFilesAfterEnv": [
+          "<rootDir>/test/setup-unit.test.ts"
+        ]
+      },
+      {
+        "displayName": "integration",
+        "testMatch": [
+          "<rootDir>/test/integration/**/*.test.ts"
+        ],
+        "transform": {
+          "^.+\\.(t|j)s$": "ts-jest"
+        },
+        "testEnvironment": "node",
+        "setupFilesAfterEnv": [
+          "<rootDir>/test/setup-integration.test.ts"
+        ]
+      }
+    ],
+    "collectCoverageFrom": [
+      "<rootDir>/src/**/*.ts",
+      "!<rootDir>/src/**/index.ts",
+      "!<rootDir>/src/**/*.test.ts"
+    ],
+    "coverageReporters": [
+      "clover",
+      "json",
+      "lcov",
+      "text",
+      "cobertura"
+    ],
+    "coverageDirectory": "coverage"
+  },
+  "markdown-to-html": {
+    "corners": false,
+    "reurls": {
+      "README.md": "index.html",
+      "https://lupdo-sqlite.lupennat.com/": "/"
+    }
+  }
 }
